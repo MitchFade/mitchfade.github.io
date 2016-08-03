@@ -7,11 +7,36 @@
  
   <form action="/welcome/index" class="new_user" id="new_user" method="get">
     <label for="user_name">Name</label>
-    <input id="user_name" name="user[name]" type="text" />
-    <input id="user_name" name="user[name2]" type="text" />
+    <input id="filename" name="user[filename]" type="text" />
+    <input id="latitude" name="user[name]" type="text" />
+    <input id="longitude" name="user[name2]" type="text" />
+
+    <button type="button"
+onclick="document.getElementById('demo').innerHTML = my_form(this.form)">
+Add point data</button>
+
     <input type="submit" />
   </form>
 
+
+<%= @lat_value = params["user"] %>
+<%= @long_value = params["user"]%>
+
+
+<h2><%= @client.download_file(4547, 890157) %> </h2>
+<% @coords = @client.download_file(4547, 890157) %>
+<%= @point1 = @coords.split(',') %>
+
+
+<%= @point2 = @point1.each { |x| puts x } %>
+
+
+<% @erb_array = [10 ,20] %>
+<% @erb_array.push(@coords) %> 
+
+<%= @erb_array.each { |x| puts x } %>
+
+<p id="demo"> <%= @coords %> </p>
 
 
 <head> 
@@ -22,41 +47,35 @@
 <body>
   <div id="map" style="width: 500px; height: 400px;"></div>
   
-  <p id="demo3"></p>
-<script>
-  var my_stuff = <%=@controller_message %>;
-  document.getElementById("demo3").innerHTML = my_stuff;
-</script>
-
-
-<h2><%= @client.download_file(4547, 890157) %> </h2>
-<% @coords = @client.download_file(4547, 890157) %>
-<%= @point1 = @coords.split(',') %>
-
-<%= @looped_message %>
-
-
-<% @erb_array = [10,20,30,40] %> 
-
-<%= @erb_array.each { |x| puts x } %>
-
-
-
-
   <script>
+var file_string = document.getElementById("demo").innerHTML;
+    var file_array = file_string.split(',');
+    alert(file_string);
+
+var array1 = file_array;
+var lat_array = [];
+var long_array = []; 
+
+function my_form(form){
+   form.latitude.value = lat_array;
+   form.longitude.value = long_array;  
+}
+
+// now what?
+// handling file uploads 
+// put on github 
+// section homework 
+
+
     // Define your locations: HTML content for the info window, latitude, longitude
     var locations = [
-      ['<h4>Bondi Beach</h4>', <%= @point1[0] %>, <%= @point1[0] %>],
-      ['<h4>Coogee Beach</h4>', <%= @point1[1] %>, <%= @point1[1] %>],
-      ['<h4>Cronulla Beach</h4>', <%= @point1[2] %>, <%= @point1[2] %>],
-      ['<h4>Manly Beach</h4>', <%= @point1[3] %>, <%= @point1[3] %>],
-      ['<h4>Maroubra Beach</h4>', <%= @point1[4] %>, <%= @point1[4] %>]
+      ['<h4>Bondi Beach</h4>', -33.890542, 151.274856],
+      ['<h4>Coogee Beach</h4>', -33.923036, 151.259052],
+      ['<h4>Cronulla Beach</h4>', -34.028249, 151.157507],
+      ['<h4>Manly Beach</h4>', -33.80010128657071, 151.28747820854187],
+      ['<h4>Maroubra Beach</h4>', -33.950198, 151.259302]
     ];
     
-   
-   var clicklats = [];
-   var clicklongs = []; 
-
     // Setup the different icons and shadows
     var iconURLPrefix = 'http://maps.google.com/mapfiles/ms/icons/';
     
@@ -69,29 +88,11 @@
       iconURLPrefix + 'pink-dot.png',      
       iconURLPrefix + 'yellow-dot.png'
     ]
-    
-    var array1 = []; 
-   var js_coords = <%= @point1[0] %>;
-   var erb_var = <%= @erb_array.each { |x| puts x } %>;
-
-
- // alert(js_coords)
-    //js_coords.split(","); 
-    //var cent_lat = array1[0];
-    //var cent_lng = array1[1]; 
-
-// to do: 
-// google maps -> add points to form from clicking 
-// write points into a local file 
-// github! 
-// style the tutorial    // github 
-
-
     var iconsLength = icons.length;
 
     var map = new google.maps.Map(document.getElementById('map'), {
       zoom: 10,
-      center: new google.maps.LatLng(20,20),
+      center: new google.maps.LatLng(-37.92, 151.25),
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       mapTypeControl: false,
       streetViewControl: false,
@@ -101,25 +102,6 @@
       }
     });
 
- google.maps.event.addListener(map, 'click', function(event) {
-    placeMarker(event.latLng);
-   // alert("annoying message!");
-  });
-
-function placeMarker(location) {
-  var marker = new google.maps.Marker({
-    position: location,
-    map: map,
-  });
-  var infowindow = new google.maps.InfoWindow({
-    content: 'Latitude: ' + location.lat() + '<br>Longitude: ' + location.lng()
-  });
-  infowindow.open(map,marker);
-  clicklats.push(location.lat());
-  clicklongs.push(location.lng()); 
-}
-
-
     var infowindow = new google.maps.InfoWindow({
       maxWidth: 160
     });
@@ -128,22 +110,10 @@ function placeMarker(location) {
     
     var iconCounter = 0;
     
-var array_2 = [0,0]; 
-
-
-  for(i=0; i<5; i++){
-   //alert(erb_var[i]);
-   var stuff3 = erb_var[i]; 
-   array_2.push(stuff3);
-//   alert(array_2[i]);
- }
-alert(array_2);
-
-
     // Add the markers and infowindows to the map
-    for (var i = 0; i < locations.length + 1; i++) {  
+    for (var i = 0; i < locations.length; i++) {  
       var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(array_2[i], array_2[i]),
+        position: new google.maps.LatLng(array1[i], array1[i]),
         map: map,
         icon: icons[iconCounter]
       });
@@ -152,7 +122,7 @@ alert(array_2);
 
       google.maps.event.addListener(marker, 'click', (function(marker, i) {
         return function() {
-          infowindow.setContent(array_2[i]);
+          infowindow.setContent(locations[i][0]);
           infowindow.open(map, marker);
         }
       })(marker, i));
@@ -163,6 +133,27 @@ alert(array_2);
         iconCounter = 0;
       }
     }
+
+    google.maps.event.addListener(map, 'click', function(event) {
+    placeMarker(event.latLng);
+    //alert("popup");
+  });
+   
+   function placeMarker(location) {
+  var marker = new google.maps.Marker({
+    position: location,
+    map: map,
+  });
+  var infowindow = new google.maps.InfoWindow({
+    content: 'Latitude: ' + location.lat() + '<br>Longitude: ' + location.lng()
+  });
+  lat_array.push(location.lat());
+  long_array.push(location.lng()); 
+  infowindow.open(map,marker);
+}
+
+
+
 
     function autoCenter() {
       //  Create a new viewpoint bound
@@ -183,14 +174,7 @@ alert(array_2);
   <% workspace = workspace['workspace'] %>
   <h2><%= workspace['name'] %></h2>
     
-
-<h2><%= @client.download_file(4547, 890167) %> </h2>
-<% @coords = @client.download_file(4547, 890167) %>
-
-
 <% end %>
-
- 
 
 <script>
   var msg = <% @controller_message %>;

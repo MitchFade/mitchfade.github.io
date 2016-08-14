@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+.w3-sidenav a,.w3-sidenav h4{padding:12px;}
+.w3-navbar a{padding-top:12px !important;padding-bottom:12px !important;}
+</style>
+<body>
+
+<!-- Navbar -->
+<ul class="w3-navbar w3-theme w3-top w3-left-align w3-large" style="z-index:4;">
+  <li class="w3-opennav w3-right w3-hide-large">
+    <a class="w3-hover-white w3-large w3-theme-l1" href="javascript:void(0)" onclick="w3_open()"><i class="fa fa-bars"></i></a>
+  </li>
+  <li><a href="" class="w3-theme-l1"><img src="https://s.graphiq.com/sites/default/files/1570/media/images/Onehub_7395272.png" alt="Mountain View" style="width:304px;height:60px;"></a>
+  </li>
+</ul>
+
+<!-- Sidenav -->
+<nav class="w3-sidenav w3-collapse w3-theme-l5 w3-animate-left" style="z-index:3;width:250px;margin-top:51px;" id="mySidenav">
+  <a href="javascript:void(0)" onclick="w3_close()" class="w3-right w3-xlarge w3-padding-large w3-hover-black w3-hide-large" title="close menu">
+    <i class="fa fa-remove"></i>
+  </a>
+  <br>
+  <h4><b>Menu</b></h4>
+  <a href="http://developer.onehub.com/" class="w3-hover-black">API docunentation</a>
+</nav>
+
+<!-- Overlay effect when opening sidenav on small screens -->
+<div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+<!-- Main content: shift it to the right by 250 pixels when the sidenav is visible -->
+<div class="w3-main" style="margin-left:250px">
+<br>
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">First step: Using the OAuth2 client to have access to the OneHub API</h1>
+      p>In order to use the OneHub API you need to bundle the OAuth2 gem with your projects and include the gem in your GEMFILE</p>
+<p>A link to the OAuth2 gem can be found here:</p>
+
+<p>Next under app -> controllers -> welcome_index.rb (in this tutorial we use the controller for the default #index page) write "require OAuth2" to include the gem in your app's controller. Under the controllers class add your API host. This will be different from the tutorial. Under "def index" add a new array called options and a new global variable to contain your OneHub login information. Finally create a global variable to list the workspaces. The final code should look like:</p>
+
+
+<textarea rows="4" cols="50" readonly>
+require 'oauth2'
+
+class WelcomeController < ApplicationController
+  API_HOST = 'ws.onehubmaster.com'
+
+  def index 
+    options = {}
+    # these should be changed / omitted from example code
+    
+    @client = Onehub.new('mitchfade11@gmail.com', 'weenie123')
+    # => OAuth2::Response"
+    @workspaces = @client.list_workspaces
+</textarea>
+    </div>
+  </div>
+
+  <div class="w3-row">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">Working with the OneHub API key</h1>
+  <p>After you have entered the nesesary code to conroller, create a new file titled "onehub.rb" under the lib folder in your rails project. Create a class titled OneHub and then set your OAuth2 API key, secret and API host. Next create a new subroutine to login with the OAuth 2 key and secret.
+The final code should look like:</p>
+<br>
+<textarea rows="10" cols="60" readonly>
+class Onehub
+  API_KEY    = '7q2nkfd3mbhazr4kstud87syq91gt70'.freeze
+  API_SECRET = 'hyn3fepcy8i5curm9jeqm378052z62'.freeze
+  API_HOST   = 'https://ws-api.onehubmaster.com'.freeze
+
+  def initialize(username, password)
+    @client = OAuth2::Client.new(API_KEY, API_SECRET, site: API_HOST)
+    @token  = @client.password.get_token(username, password)
+  end
+</textarea>
+<br> 
+ 
+
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">Listing workspaces</h1>
+      <p>Now its time to actually do something with the OneHub API! YAY! </p>
+<p>In your onehub.rb file add a new method which lists workspaces and can be called later in the view. To do this use the json.parse command to retun information about a OneHub workspace in JSON format. OneHub uses a REST interface which returns JSON. Use the path '/workspaces.json' to call JSON containing metadata about the workspaces in your OneHub account. The method should look like: </p>
+<br> 
+<textarea rows="3" cols="60" readonly>
+ def list_workspaces
+    JSON.parse(@token.get('/workspaces.json').body)
+  end
+</textarea>
+<br> 
+<p>To return the metadata from your workspace in your view (In this tutorial we used the default index.html.erb) create a .each loop within your erb hashes. To do this we will call the global variable @workspaces which we defined in the controller and use the hash ['items']. Next define a new variable "workspace" with the hash ['worspaces'] which we will later call to display information about the workspaces. Finally in a visible erb hash (a "<%=" ) we can call the variable workspace with the hash ['name'] which will display information about workspaces. The final erb code should look like: </p>
+<br>
+<textarea rows="4" cols="60" readonly>
+<% @workspaces['items'].each do |workspace| %>
+  <% workspace = workspace['workspace'] %>
+  <h2><%= workspace['name'] %></h2>
+<% end %>
+</textarea>
+<br> 
+
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">Returning the name of files in a workspace:</h1>
+
+<p>Back in your onehub.rb file add a new method called list_file to parse JSON that shows metadata about the files within a workspace. In this method we will use the path "/workspaces/#{workspace_id}/files.json" to retrieve JSON specific to a workspace. The final code in onehub.rb should look like: </p>
+<br> 
+<textarea rows="3" cols="60" readonly>
+  def list_files(workspace_id) 
+    JSON.parse(@token.get("/workspaces/#{workspace_id}/files.json").body)
+  end
+</textarea>
+<br> 
+<p>Next we can call the method in index.html.erb inside of our .each loop in order to display the information. The final code in the erb file is now: </p>
+<br>
+<textarea rows="4" cols="60" readonly>
+<% @workspaces['items'].each do |workspace| %>
+  <% workspace = workspace['workspace'] %>
+  <h2><%= workspace['name'] %></h2>
+  <h3><%= @client.list_files(workspace['id']) %></h3>
+<% end %>
+</textarea>
+<br> 
+<p>Congragulations! you now know how to call and return infromation from OneHub's API!</p>
+
+    </div>
+  </div>
+
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">Returning the name of files in a workspace:</h1>
+
+<p>Create a new method named download_file in onehub.rb and give it the endpoints #{workspace_id} and #{id} for the file id. This will allow you to enter a workspace id and a file id as paramaters for returing the function in a view. The final code in onehub.rb should look like:  </p>
+<br> 
+<textarea rows="3" cols="60" readonly>
+ def download_file(workspace_id, id)
+    @token.get("/workspaces/#{workspace_id}/files/#{id}/download").body
+  end 
+</textarea>
+<br> 
+<p>In this function we use @token.get since we are using a http get request to return data from a server instead of parsing data returned in JSON format as we did in the last example. </p>
+<br>
+<p>Next in your views file call the function by calling your method on the instance variable @client. </p>
+
+<textarea rows="1" cols="60" readonly>
+<%= @download = @client.download_file(4547, @filename ) %>
+</textarea>
+<br> 
+<p>This should read simple text and csv files. </p>
+    </div>
+  </div>
+
+<!-- END MAIN -->
+</div>
+
+
+<script>
+// Get the Sidenav
+var mySidenav = document.getElementById("mySidenav");
+
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+
+// Toggle between showing and hiding the sidenav, and add overlay effect
+function w3_open() {
+    if (mySidenav.style.display === 'block') {
+        mySidenav.style.display = 'none';
+        overlayBg.style.display = "none";
+    } else {
+        mySidenav.style.display = 'block';
+        overlayBg.style.display = "block";
+    }
+}
+
+// Close the sidenav with the close button
+function w3_close() {
+    mySidenav.style.display = "none";
+    overlayBg.style.display = "none";
+}
+</script>
+
+</body>
+</html>
